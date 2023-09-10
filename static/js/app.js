@@ -1,19 +1,17 @@
 // url
 url = "https://2u-data-curriculum-team.s3.amazonaws.com/dataviz-classroom/v1.1/14-Interactive-Web-Visualizations/02-Homework/samples.json";
 
-
-
-// Display charts
+// DISPLAY CHARTS
 
 // Create a horizontal bar chart with a dropdown menu to display the top 10 OTUs found in that individual
 // Use sample_values as the values for the bar chart.
 // Use otu_ids as the labels for the bar chart.
 // Use otu_labels as the hovertext for the chart.
 
-
+// create a function to call the charts
 function charts(sampleobject) {
 
-// Fetch json file
+// Fetch json file data and console log it
     d3.json(url).then(function(data) {
         console.log(data);
     
@@ -33,7 +31,6 @@ function charts(sampleobject) {
         text: otu_labels.slice(0,10).reverse(),
         type: "bar",
         orientation: "h"
-
       };
     
     let barLayout = {
@@ -74,58 +71,59 @@ function charts(sampleobject) {
 
 };
 
-charts("940");
 
+// Display metadata i.e. Demographic info
 
+// Create a function 
+function buildMetadata(sample) {
 
-// Display Demographic info
-
-
-function display(new_sample_id) {
-
-    // Fetch json
+    // Fetch json data file and console log it
     d3.json(url).then(function(data) {
         console.log(data);
 
-    let metadata_info = data.metadata;
+    const resultArray = data.metadata.filter(sampleObj => sampleObj.id == sample);
+    const result = resultArray[0]; // Assuming sample numbers are unique.
 
-    let metadata_box = document.getElementById('sample-metadata');
+    // Use d3 to select the panel with id of `#sample-metadata`
+    let PANEL = d3.select("#sample-metadata");
 
-    display(new_sample_id);
+    // Use `.html("") to clear any existing metadata
+    PANEL.html("");
 
-});
+    // Hint: Inside the loop, you will need to use d3 to append new
+    // tags for each key-value in the metadata.
+    for (key in result){
+      PANEL.append("h6").text(`${key.toUpperCase()}: ${result[key]}`);
+    };
 
-}
+})
 
-// Function to display sample metadata
-function display(metadata_info) {
-    
-    // Fetch json
-    d3.json(url).then(function(data) {
-        console.log(data);
-
-   // let metadata_box = data.metadata;
-    let metadata_box = document.getElementById('sample-metadata');
-
-});
-}
-
-display(metadata_info);
+};
 
 
-// Dropdown
+// Creating the Dropdown option
 
+// Create a function to call 
 function init() {
 
     d3.json(url).then(function(data) {
         console.log(data.names);
-
+    
+    // select the html element
     let dropdownMenu = d3.select("#selDataset");
     let sample_names = data.names;
     for (let i = 0; i < sample_names.length; i++) {
         dropdownMenu.append("option").text(sample_names[i]).property("value", sample_names[i]);
     }
+
+    // Use the first sample from the list to build the initial plots
+    let firstSample = data.names[0];
+    console.log(firstSample);
+    charts(firstSample);
+    buildMetadata(firstSample);
+
     })
+
 }
 
 // This function is called when a dropdown menu item is selected
@@ -133,6 +131,7 @@ function optionChanged(new_sample_id) {
   
 
  charts(new_sample_id);
+ buildMetadata(new_sample_id);
 
 }
 
